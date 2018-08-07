@@ -14,8 +14,8 @@ import java.util.List;
 
 public class ChecksumOrganizer {
 
-	private final static String MD5_EXT = "md5";
-	private final static String SYS_FILE_BEGIN = "!slv-" + MD5_EXT + "-";
+	private final static String[] EXTENSIONS = { "sfv", "md5", "sha1" };
+	private final static String SYS_FILE_BEGIN = "!slv-textdb-";
 	private final static byte[] UTF8_BOM = { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF };
 	private static int readedFile = 0;
 
@@ -24,19 +24,32 @@ public class ChecksumOrganizer {
 
 	public static void main(String[] args) {
 		if (args.length == 0) {
-			System.err.println("args[0] -- path to scan '" + MD5_EXT + "'");
+			final String COMMA = ", ";
+			String listExt = "";
+			for (String ext : EXTENSIONS) {
+				listExt += ext + COMMA;
+			}
+			listExt = listExt.substring(0, listExt.length() - COMMA.length());
+			System.err.println("args[0] -- path to find checksum's files (" + listExt + ")");
 			return;
 		}
 
-		final String dir = args[0];
-		final List<Path> arrPaths = FindFile.findFilesByExt(dir, SYS_FILE_BEGIN, MD5_EXT);
+		final String sourcePath = args[0];
+		final String fileNamePart = SYS_FILE_BEGIN + (new SimpleDateFormat("yyyy-MM-dd'T'HH-mm-ss")).format(new Date());
+
+		for (String ext : EXTENSIONS) {
+			findChecksumFiles(sourcePath, fileNamePart, ext);
+		}
+	}
+
+	private static void findChecksumFiles(final String sourcePath, final String fileNamePart, final String extension) {
+		final List<Path> arrPaths = FindFile.findFilesByExt(sourcePath, SYS_FILE_BEGIN, extension);
 		if (arrPaths.isEmpty()) {
 			return;
 		}
 
-		final String fileName = SYS_FILE_BEGIN
-				+ new SimpleDateFormat("yyyy-MM-dd'T'HH-mm-ss'." + MD5_EXT + "'").format(new Date());
-		final Path target = Paths.get(dir, fileName);
+		final String fileName = fileNamePart + "." + extension;
+		final Path target = Paths.get(sourcePath, fileName);
 		try (OutputStream writer = Files.newOutputStream(target, StandardOpenOption.CREATE_NEW)) {
 			writer.write(UTF8_BOM);
 			arrPaths.stream().forEach(path -> transferToFile(writer, path));
@@ -44,7 +57,7 @@ public class ChecksumOrganizer {
 			System.err.format("IOException: %s%n", x);
 		}
 
-		System.out.println("File found: " + arrPaths.size());
+		System.out.println("===\t" + extension + "\nFile found: " + arrPaths.size());
 		System.out.println("File read: " + readedFile);
 	}
 
@@ -58,16 +71,13 @@ public class ChecksumOrganizer {
 	}
 
 	private static void transferToFile2Try(final OutputStream target, final Path source) throws IOException {
-		boolean isNeedUtf8 = true;
 		try {
 			transferToFile(target, source, Charset.forName("windows-1251"));
-			isNeedUtf8 = false;
+			return;
 		} catch (CharacterCodingException ex) {
 		}
 
-		if (isNeedUtf8) {
-			transferToFile(target, source, StandardCharsets.UTF_8);
-		}
+		transferToFile(target, source, StandardCharsets.UTF_8);
 	}
 
 	private static void transferToFile(final OutputStream target, final Path source, final Charset charset)
