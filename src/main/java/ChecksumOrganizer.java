@@ -1,4 +1,3 @@
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.CharacterCodingException;
@@ -10,7 +9,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 public class ChecksumOrganizer {
 
@@ -43,14 +41,14 @@ public class ChecksumOrganizer {
 	}
 
 	private static void findChecksumFiles(final String sourcePath, final String fileNamePart, final String extension) {
-		final List<Path> arrPaths = FindFile.findFilesByExt(sourcePath, SYS_FILE_BEGIN, extension);
+		final var arrPaths = FindFile.findFilesByExt(sourcePath, SYS_FILE_BEGIN, extension);
 		if (arrPaths.isEmpty()) {
 			return;
 		}
 
 		final String fileName = fileNamePart + "." + extension;
 		final Path target = Paths.get(sourcePath, fileName);
-		try (OutputStream writer = Files.newOutputStream(target, StandardOpenOption.CREATE_NEW)) {
+		try (var writer = Files.newOutputStream(target, StandardOpenOption.CREATE_NEW)) {
 			writer.write(UTF8_BOM);
 			arrPaths.stream().forEach(path -> transferToFile(writer, path));
 		} catch (IOException x) {
@@ -82,7 +80,7 @@ public class ChecksumOrganizer {
 
 	private static void transferToFile(final OutputStream target, final Path source, final Charset charset)
 			throws IOException {
-		try (BufferedReader reader = Files.newBufferedReader(source, charset)) {
+		try (var reader = Files.newBufferedReader(source, charset)) {
 			String line = null;
 			final StringBuilder sb = new StringBuilder(1024);
 			while ((line = reader.readLine()) != null) {

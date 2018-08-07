@@ -15,4 +15,4 @@ include 'api'
 include 'services:webservice'
 */
 
-rootProject.name = 'ChecksumOrganizer'
+rootProject.name = 'checksum-organizer'

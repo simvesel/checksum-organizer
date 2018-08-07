@@ -9,11 +9,10 @@ import java.util.List;
 public class FindFile {
 
 	private FindFile() {
-		// TODO Auto-generated constructor stub
 	}
 
 	public static List<Path> findFilesByExt(final String location, final String sysBeginPart, final String extension) {
-		final List<Path> arr = new ArrayList<>();
+		final var arr = new ArrayList<Path>();
 		final String extension0 = "." + extension;
 
 		try {
