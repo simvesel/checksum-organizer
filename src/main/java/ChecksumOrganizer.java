@@ -41,7 +41,7 @@ public class ChecksumOrganizer {
 	}
 
 	private static void findChecksumFiles(final String sourcePath, final String fileNamePart, final String extension) {
-		final var arrPaths = FindFile.findFilesByExt(sourcePath, SYS_FILE_BEGIN, extension);
+		final var arrPaths = FindFile.findFilesByOneExtWithoutSysfiles(sourcePath, SYS_FILE_BEGIN, extension);
 		if (arrPaths.isEmpty()) {
 			return;
 		}
@@ -61,14 +61,14 @@ public class ChecksumOrganizer {
 
 	private static void transferToFile(final OutputStream target, final Path source) {
 		try {
-			transferToFile2Try(target, source);
+			transferToFileWith2Attempts(target, source);
 			++readedFile;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private static void transferToFile2Try(final OutputStream target, final Path source) throws IOException {
+	private static void transferToFileWith2Attempts(final OutputStream target, final Path source) throws IOException {
 		try {
 			transferToFile(target, source, Charset.forName("windows-1251"));
 			return;
@@ -82,7 +82,7 @@ public class ChecksumOrganizer {
 			throws IOException {
 		try (var reader = Files.newBufferedReader(source, charset)) {
 			String line = null;
-			final StringBuilder sb = new StringBuilder(1024);
+			final StringBuilder sb = new StringBuilder(4096);
 			while ((line = reader.readLine()) != null) {
 				line = line.trim();
 				if (!line.isEmpty()) {
