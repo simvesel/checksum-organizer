@@ -7,20 +7,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class ChecksumOrganizer {
 
-	private final static String[] EXTENSIONS = { "sfv", "md5", "sha1" };
+	private final static String[] EXTENSIONS = {"sfv", "md5", "sha1"};
 	private final static String SYS_FILE_BEGIN = "!slv-textdb-";
-	private final static byte[] UTF8_BOM = { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF };
+	private final static byte[] UTF8_BOM = {(byte) 0xEF, (byte) 0xBB, (byte) 0xBF};
 	private static int readedFile = 0;
 
 	private ChecksumOrganizer() {
 	}
 
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		if (args.length == 0) {
 			final String COMMA = ", ";
 			String listExt = "";
@@ -33,7 +33,8 @@ public class ChecksumOrganizer {
 		}
 
 		final String sourcePath = args[0];
-		final String fileNamePart = SYS_FILE_BEGIN + (new SimpleDateFormat("yyyy-MM-dd'T'HH-mm-ss")).format(new Date());
+		final String fileNamePart = SYS_FILE_BEGIN + LocalDateTime.now().
+				format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH-mm-ss"));
 
 		for (String ext : EXTENSIONS) {
 			findChecksumFiles(sourcePath, fileNamePart, ext);
@@ -41,7 +42,7 @@ public class ChecksumOrganizer {
 	}
 
 	private static void findChecksumFiles(final String sourcePath, final String fileNamePart, final String extension) {
-		final var arrPaths = FindFile.findFilesByOneExtWithoutSysfiles(sourcePath, SYS_FILE_BEGIN, extension);
+		final var arrPaths = FindFile.findFilesByOneExtWithoutSysFiles(sourcePath, SYS_FILE_BEGIN, extension);
 		if (arrPaths.isEmpty()) {
 			return;
 		}
@@ -50,7 +51,10 @@ public class ChecksumOrganizer {
 		final Path target = Paths.get(sourcePath, fileName);
 		try (var writer = Files.newOutputStream(target, StandardOpenOption.CREATE_NEW)) {
 			writer.write(UTF8_BOM);
-			arrPaths.stream().forEach(path -> transferToFile(writer, path));
+
+			for (Path path : arrPaths) {
+				transferToFile(writer, path);
+			}
 		} catch (IOException x) {
 			System.err.format("IOException: %s%n", x);
 		}
@@ -63,8 +67,8 @@ public class ChecksumOrganizer {
 		try {
 			transferToFileWith2Attempts(target, source);
 			++readedFile;
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (IOException ex) {
+			throw new RuntimeException(ex);
 		}
 	}
 
