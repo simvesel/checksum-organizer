@@ -1,3 +1,4 @@
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.CharacterCodingException;
@@ -64,7 +65,8 @@ public final class ChecksumOrganizer {
 		int readFile = 0;
 		final var fileName = fileNamePart + "." + extension;
 		final Path target = Paths.get(sourcePath, fileName);
-		try (var writer = Files.newOutputStream(target, StandardOpenOption.CREATE_NEW)) {
+		try (var os = Files.newOutputStream(target, StandardOpenOption.CREATE_NEW);
+		     var writer = new BufferedOutputStream(os, 64 * 1024)) {
 			writer.write(UTF8_BOM);
 
 			for (final var path : arrPaths) {
@@ -109,7 +111,7 @@ public final class ChecksumOrganizer {
 			throws IOException {
 		try (var reader = Files.newBufferedReader(source, charset)) {
 			String line;
-			final var sb = new StringBuilder(12 * 1024);
+			final var sb = new StringBuilder(16 * 1024);
 			while ((line = reader.readLine()) != null) {
 				line = line.strip();
 				if (!line.isEmpty()) {
