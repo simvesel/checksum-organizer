@@ -15,20 +15,21 @@ public final class FindFile {
 		// System.out.println("===\tPath: " + path.toString());
 
 		if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
-			final String filename = path.getFileName().toString().toLowerCase();
+			final var filename = path.getFileName().toString().toLowerCase();
 			return filename.endsWith(extension) && !filename.startsWith(sysBeginPart);
 		}
 		return false;
 	}
 
-	public static List<Path> findFilesByOneExtWithoutSysFiles(final String location, final String sysBeginPart,
+	public static List<Path> findFilesByOneExtWithoutSysFiles(final String location,
+	                                                          final String sysBeginPart,
 	                                                          final String extension) {
 		final var arr = new ArrayList<Path>();
-		final String extension0 = "." + extension;
+		final var extension0 = "." + extension;
 
 		try (var dirStream = Files.newDirectoryStream(Paths.get(location),
 				path -> innerSearchFunc(path, sysBeginPart, extension0))) {
-			for (Path path : dirStream) {
+			for (final var path : dirStream) {
 				arr.add(path);
 			}
 		} catch (IOException ex) {

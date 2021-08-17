@@ -40,7 +40,7 @@ jar {
 }
 
 task runFinalJar(type: JavaExec) {
-    System.out.println "Args:"
+    System.out.println "!!!Input Args:"
     def locArgs = System.in.newReader().readLine()
     args locArgs
     classpath = files(tasks.jar)
