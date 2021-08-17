@@ -8,13 +8,17 @@
 
 // Apply the java-library plugin to add support for Java Library
 apply plugin: 'java-library'
-// apply plugin: 'application'
+
 
 // In this section you declare where to find the dependencies of your project
 repositories {
     // Use jcenter for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
-    jcenter()
+    mavenCentral()
+    maven {
+        url 'https://repo.maven.apache.org/maven2'
+        name 'Maven Central'
+    }
 }
 
 dependencies {
@@ -22,12 +26,24 @@ dependencies {
     // implementation 'com.google.guava:guava:23.0'
 
     // Use JUnit test framework
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13.2'
 }
 
-// mainClassName = 'ChecksumOrganizer'
+
+// URI of your main class/application's entry point (required)
+project.ext.slvMainClassName = 'ChecksumOrganizer'
+
 jar {
-  manifest {
-    attributes 'Main-Class': 'ChecksumOrganizer'
-  }
+    manifest {
+        attributes 'Main-Class': project.ext.slvMainClassName
+    }
+}
+
+task runFinalJar(type: JavaExec) {
+    System.out.println "Args:"
+    def locArgs = System.in.newReader().readLine()
+    args locArgs
+    classpath = files(tasks.jar)
+    classpath += sourceSets.main.runtimeClasspath
+    mainClass = project.ext.slvMainClassName
 }

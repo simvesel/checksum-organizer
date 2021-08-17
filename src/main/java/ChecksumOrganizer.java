@@ -28,6 +28,7 @@ public final class ChecksumOrganizer {
 		final var fileNamePart = SYS_FILE_BEGIN + LocalDateTime.now().
 				format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH-mm-ss"));
 
+		System.out.println("===\tSearching checksum files...");
 		for (String ext : EXTENSIONS) {
 			searchChecksumFiles(sourcePath, fileNamePart, ext);
 		}

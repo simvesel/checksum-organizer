@@ -12,6 +12,8 @@ public final class FindFile {
 	}
 
 	private static boolean innerSearchFunc(final Path path, final String sysBeginPart, final String extension) {
+		// System.out.println("===\tPath: " + path.toString());
+
 		if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
 			final String filename = path.getFileName().toString().toLowerCase();
 			return filename.endsWith(extension) && !filename.startsWith(sysBeginPart);
